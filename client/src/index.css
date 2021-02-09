@@ -1,0 +1,24 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+}
+
+
+pre {
+  padding: 1em;
+  background-color: #ccc;
+}
+
+
+.pagination {
+
+}
+
+.pagination button {
+  margin-left: 0.5rem;
+}
+
+.results {
+  margin-top: 1rem;
+}

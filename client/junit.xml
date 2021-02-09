@@ -1,0 +1,21 @@
+<testsuites name="jest tests" tests="4" failures="1" time="5.771">
+  <testsuite name="true is truthy and false is falsy" errors="0" failures="1" skipped="0" timestamp="2021-02-05T21:12:27" time="5.771" tests="4">
+    <testcase classname="true is truthy and false is falsy true is truthy" name="true is truthy and false is falsy true is truthy" time="0.003">
+    </testcase>
+    <testcase classname="true is truthy and false is falsy false is falsy" name="true is truthy and false is falsy false is falsy" time="0.001">
+    </testcase>
+    <testcase classname="sum sums up two values" name="sum sums up two values" time="0.001">
+    </testcase>
+    <testcase classname="AppTest renders App component" name="AppTest renders App component" time="4.654">
+      <failure>Error: expect(received).toHaveTextContent()
+
+received value must be an HTMLElement or an SVGElement.
+Received has value: null
+    at /home/tom/ai-fullstack-eng-challenge/my-challenge-solution/client/src/App.test.js:75:25
+    at runExpectation (/home/tom/ai-fullstack-eng-challenge/my-challenge-solution/client/node_modules/wait-for-expect/lib/index.js:49:25)
+    at Timeout.callback [as _onTimeout] (/home/tom/ai-fullstack-eng-challenge/my-challenge-solution/client/node_modules/jsdom/lib/jsdom/browser/Window.js:523:19)
+    at listOnTimeout (internal/timers.js:554:17)
+    at processTimers (internal/timers.js:497:7)</failure>
+    </testcase>
+  </testsuite>
+</testsuites>
