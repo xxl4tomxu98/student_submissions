@@ -18,7 +18,7 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
 
-app.json_encoder = MyJSONEncoder
+# app.json_encoder = MyJSONEncoder
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')

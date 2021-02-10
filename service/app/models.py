@@ -1,66 +1,43 @@
 from flask_sqlalchemy import SQLAlchemy
 import flask.json, decimal
+from datetime import datetime
+
 db = SQLAlchemy()
 
 
-movies_tags = db.Table(
-    'movies_tags',
+rosters = db.Table(
+    'rosters',
     db.Model.metadata,
     db.Column(
-        'tag_id', db.Integer, db.ForeignKey('tags.id'), primary_key=True
-    ), db.Column('movie_id', db.Integer,
-                 db.ForeignKey('movies.movie_id'), primary_key=True)
+        'student_id', db.Integer, db.ForeignKey('students.id'), primary_key=True
+    ), db.Column('course_id', db.Integer,
+                 db.ForeignKey('courses.id'), primary_key=True)
 )
 
 
 # This is flask json encoding for jsonify Numeric object like rating
-class MyJSONEncoder(flask.json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, decimal.Decimal):
-            # Convert decimal instances to strings.
-            return str(obj)
-        return super(MyJSONEncoder, self).default(obj)
+# class MyJSONEncoder(flask.json.JSONEncoder):
+#     def default(self, obj):
+#         if isinstance(obj, decimal.Decimal):
+#             # Convert decimal instances to strings.
+#             return str(obj)
+#         return super(MyJSONEncoder, self).default(obj)
 
 
 class Submission(db.Model):
     __tablename__ = 'submissions'
 
     id = db.Column(db.Integer, primary_key=True)
-    course_work_id = db.Column(db.Integer, nullable=False)
-    course_id = db.Column(db.Integer, nullable=False)
-    student_id = db.Column(db.Integer, nullable=False)
-    title = db.Column(db.String(255), nullable=False)
-    genres = db.Column(db.String(255), nullable=False)
-    ratings = db.relationship("Rating", backref='movie', lazy=True)
-    tags = db.relationship("Tag", backref='movie', lazy=True)
-    links = db.relationship("Link", backref='movie', lazy=True)
-    movie_tags = db.relationship('Tag', back_populates='tagged_movies',
-                                    secondary='movies_tags')
-    @property
-    def tag_count(self):
-        return len(self.tags)
+    course_work_id = db.Column(db.Integer, db.ForeignKey('course_works.id'),
+                               nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=False)
+    # student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False)
+    type = db.Column(db.Enum("NEW", "TURNED_IN", name="status"))
+    assigned_points = db.Column(db.Float, nullable=False)
+    max_points = db.Column(db.Float, nullable=False)
 
-    @property
-    def rating_count(self):
-        return len(self.ratings)
 
-    @property
-    def genres_array(self):
-        if '|' not in self.genres:
-            return [self.genres]
-        return self.genres.split('|')
 
-    @property
-    def release_year(self):
-        return self.title[-5:-1]
-
-    @property
-    def avg_rating(self):
-        ratings = Rating.query.filter_by(movie_id=self.movie_id).all()
-        all_ratings = [r.rating for r in ratings]
-        if len(all_ratings) != 0:
-            return "{:2.1f}".format(sum(all_ratings)/len(all_ratings))
-        return 0
 
     @property
     def all_tags(self):
@@ -86,68 +63,84 @@ class Submission(db.Model):
         }
 
 
-class Rating(db.Model):
-    __tablename__ = "ratings"
+class Student(db.Model):
+    __tablename__ = "students"
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, nullable=False)
-    movie_id = db.Column(db.Integer, db.ForeignKey('movies.movie_id'), nullable=False)
-    rating = db.Column(db.Numeric(2,1), nullable=False)
-    timestamp = db.Column(db.Integer)
+    school_id = db.Column(db.Integer, nullable=False)
+    grade_level = db.Column(db.String(255), nullable=False)
 
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "user_id": self.user_id,
-            "movie_id": self.movie_id,
-            "rating": self.rating,
-            "timestamp": self.timestamp,
-        }
-
-
-class Tag(db.Model):
-    __tablename__ = "tags"
-
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, nullable=False)
-    movie_id = db.Column(db.Integer, db.ForeignKey('movies.movie_id'), nullable=False)
-    tag = db.Column(db.String(255))
-    timestamp = db.Column(db.Integer)
-    tagged_movies = db.relationship('Movie',
-                                       back_populates='movie_tags',
-                                       secondary='movies_tags')
+    # student_submissions = db.relationship('Submission',
+    #                                       backref='student', lazy=True)
+    enrolled_courses = db.relationship('Course',
+                                       back_populates='signedup_students',
+                                       secondary='rosters')
 
     @property
-    def tagged_movie_count(self):
-        return len(self.tagged_movies)
+    def completed_assigment_count(self):
+        all_courses = self.enrolled_courses
+        all_assignments = [work for work in course.course_works for
+                           course in all_courses]
+        return len([assignment for assignment in all_assignments
+                    if assignment.type = 'TURNED_IN'])
 
     def to_dict(self):
         return {
             "id": self.id,
-            "user_id": self.user_id,
-            "movie_id": self.movie_id,
-            "tag": self.tag,
-            "tagged_movies": self.tagged_movie_count,
-            "timestamp": self.timestamp,
+            "school_id": self.school_id,
+            "grade_level": self.grade_level,
+            "enrolled_courses": self.enrolled_courses,
+            "completed_assigment_count": self.completed_assigment_count,
         }
 
-class Link(db.Model):
-    __tablename__ = "links"
+
+class Course(db.Model):
+    __tablename__ = "courses"
 
     id = db.Column(db.Integer, primary_key=True)
-    movie_id = db.Column(db.Integer, db.ForeignKey('movies.movie_id'), nullable=False)
-    imdb_id = db.Column(db.Integer, nullable=False)
-    tmdb_id = db.Column(db.Integer, nullable=False)
+    teacher_id = db.Column(db.Integer, nullable=False)
+    name = db.Column(db.String(255))
+
+    course_submissions = db.relationship('Submission', backref='course', lazy=True)
+    course_works = db.relationship('Course_work', backref='course', lazy=True)
+    signedup_students = db.relationship('Student',
+                                       back_populates='enrolled_courses',
+                                       secondary='rosters')
+    @property
+    def avg_grade(self):
+        ratings = Rating.query.filter_by(movie_id=self.movie_id).all()
+        all_ratings = [r.rating for r in ratings]
+        if len(all_ratings) != 0:
+            return "{:2.1f}".format(sum(all_ratings)/len(all_ratings))
+        return 0
 
     def to_dict(self):
         return {
             "id": self.id,
-            "movie_id": self.movie_id,
-            "imdb_id": self.imdb_id,
-            "tmdb_id": self.tmdb_id,
+            "teacher_id": self.teacher_id,
+            "name": self.name,
         }
 
-def decimal_default(obj):
-    if isinstance(obj, decimal.Decimal):
-        return float(obj)
-    raise TypeError
+
+class Course_work(db.Model):
+    __tablename__ = "course_works"
+
+    id = db.Column(db.Integer, primary_key=True)
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=False)
+    title = db.Column(db.String(255), nullable=False)
+    due_date = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
+
+    work_submissions = db.relationship('Submission', backref='course_work', lazy=True)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "course_id": self.course_id,
+            "title": self.title,
+            "due_date": self.due_date,
+        }
+
+# def decimal_default(obj):
+#     if isinstance(obj, decimal.Decimal):
+#         return float(obj)
+#     raise TypeError
