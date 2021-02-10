@@ -36,30 +36,15 @@ class Submission(db.Model):
     assigned_points = db.Column(db.Float, nullable=False)
     max_points = db.Column(db.Float, nullable=False)
 
-
-
-
-    @property
-    def all_tags(self):
-        tags = Tag.query.filter_by(movie_id=self.movie_id).all()
-        return [t.tag for t in tags]
-
-    @property
-    def imdb_tmdb(self):
-        movie = Link.query.filter_by(movie_id=self.movie_id).first()
-        return (movie.imdb_id, movie.tmdb_id)
-
     def to_dict(self):
         return {
-            "movie_id": self.movie_id,
-            "title": self.title,
-            "genres": self.genres_array,
-            "release_year": self.release_year,
-            "tag_count": self.tag_count,
-            "all_tags": self.all_tags,
-            "rating_count": self.rating_count,
-            "avg_rating": self.avg_rating,
-            "imdb_tmdb": self.imdb_tmdb,
+            "id": self.id,
+            "course_work_id": self.course_work_id,
+            "course_id": self.course_id,
+            "student_id": self.student_id,
+            "status": self.type,
+            "assigned_points": self.assigned_points,
+            "max_points": self.max_points,
         }
 
 
@@ -69,7 +54,6 @@ class Student(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     school_id = db.Column(db.Integer, nullable=False)
     grade_level = db.Column(db.String(255), nullable=False)
-
     student_submissions = db.relationship('Submission',
                                            backref='student', lazy=True)
     enrolled_courses = db.relationship('Course',
@@ -107,6 +91,18 @@ class Course(db.Model):
                                        back_populates='enrolled_courses',
                                        secondary='rosters')
     @property
+    def submissions_count(self):
+        return len(self.course_submissions)
+
+    @property
+    def assignments_count(self):
+        return len(self.course_works)
+
+    @property
+    def enrolled_students_count(self):
+        return len(self.signedup_students)
+
+    @property
     def avg_grade(self):
         all_students = self.signedup_students
         all_submissions = [submission for submission in student.student_submissions
@@ -121,6 +117,10 @@ class Course(db.Model):
             "id": self.id,
             "teacher_id": self.teacher_id,
             "name": self.name,
+            "submissions_count": self.submissions_count,
+            "assignments_count": self.assignments_count,
+            "enrolled_students_count": self.enrolled_students_count,
+            "avg_grade": self.avg_grade,
         }
 
 
@@ -134,8 +134,14 @@ class Course_work(db.Model):
 
     work_submissions = db.relationship('Submission', backref='course_work', lazy=True)
 
+    @property
+    def count_all_submissions(self):
+        all_submissions = self.work_submissions
+        return len(all_submissions)
+
+
     def all_created_assigments(self, teacher_id):
-        courses = Course.query.filter(Course.teacher_id = teacher_id).all()
+        courses = Course.query.filter(Course.teacher_id == teacher_id).all()
         assignments = [work for work in course.course_works for course in courses]
         return len(assignments)
 
@@ -145,6 +151,7 @@ class Course_work(db.Model):
             "course_id": self.course_id,
             "title": self.title,
             "due_date": self.due_date,
+            "count": self.count_all_submissions,
         }
 
 # def decimal_default(obj):

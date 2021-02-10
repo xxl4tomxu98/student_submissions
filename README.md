@@ -1,11 +1,10 @@
 ## Backend Setup and Process
-- The four data csv files are converted to sql database tables that will seed data from the csv files into the database tables
 
-  -- Database postgresql named "challenge" were created with owner "root" and password "testpass".
+  -- Database postgresql named "records" were created with owner "records_app" and password "password".
 
-     ```create user root with password 'password' superuser; ```
+     ```create user records_app createdb password 'password'; ```
 
-     ```create database records with owner root; ```
+     ```create database records with owner records_app; ```
 
   -- Within the service folder run
      ```
