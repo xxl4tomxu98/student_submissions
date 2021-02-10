@@ -29,12 +29,12 @@ with app.app_context():
     db.session.add(alissa)
     db.session.add(ian)
 
-    cw1 = Course_work(course_id=1, title="mid_term")
-    cw2 = Course_work(course_id=1, title="final_project")
-    cw3 = Course_work(course_id=2, title="quiz_1")
-    cw4 = Course_work(course_id=2, title="quiz_2")
-    cw5 = Course_work(course_id=3, title="mid_term")
-    cw6 = Course_work(course_id=3, title="quiz_1")
+    cw1 = Course_work(course_id=1, title="mid_term", due_date=date(2021, 3, 28))
+    cw2 = Course_work(course_id=1, title="final_project", due_date=date(2021, 5, 25))
+    cw3 = Course_work(course_id=2, title="quiz_1", due_date=date(2021, 2, 18))
+    cw4 = Course_work(course_id=2, title="quiz_2", due_date=date(2021, 2, 28))
+    cw5 = Course_work(course_id=3, title="mid_term", due_date=date(2021, 4, 1))
+    cw6 = Course_work(course_id=3, title="quiz_1", due_date=date(2021, 2, 15))
     db.session.add(cw1)
     db.session.add(cw2)
     db.session.add(cw3)
@@ -45,7 +45,7 @@ with app.app_context():
     s1 = Submission(course_work_id=1, course_id=1, student_id=1,
                     type="TURNED_IN", assigned_points=90.0,
                     max_points = 100.0)
-    s2 = Submission(course_work_id=1, course_id=2, student_id=1,
+    s2 = Submission(course_work_id=3, course_id=2, student_id=1,
                     type="TURNED_IN", assigned_points=80.0,
                     max_points = 100.0)
     s3 = Submission(course_work_id=2, course_id=3, student_id=2,
@@ -55,10 +55,6 @@ with app.app_context():
     db.session.add(s2)
     db.session.add(s3)
 
-
-
-
-    db.session.add(s1)
 
 
     db.session.commit()

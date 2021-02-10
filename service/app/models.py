@@ -61,20 +61,20 @@ class Student(db.Model):
                                        secondary='rosters')
 
     @property
-    def completed_assigment_count(self):
-        all_courses = self.enrolled_courses
-        all_assignments = [work for work in course.course_works for
-                           course in all_courses]
-        return len([assignment for assignment in all_assignments
-                    if assignment.type == 'TURNED_IN'])
+    def total_submissions(self):
+        return len(self.student_submissions)
+
+    @property
+    def total_enrolled_courses(self):
+        return len(self.enrolled_courses)
 
     def to_dict(self):
         return {
             "id": self.id,
             "school_id": self.school_id,
             "grade_level": self.grade_level,
-            "enrolled_courses": self.enrolled_courses,
-            "completed_assigment_count": self.completed_assigment_count,
+            "total_enrolled_courses": self.total_enrolled_courses,
+            "total_submissions": self.total_submissions,
         }
 
 
@@ -102,16 +102,6 @@ class Course(db.Model):
     def enrolled_students_count(self):
         return len(self.signedup_students)
 
-    @property
-    def avg_grade(self):
-        all_students = self.signedup_students
-        all_submissions = [submission for submission in student.student_submissions
-                            for student in all_students]
-        all_grades = [s.assigned_points for s in all_submissions]
-        if len(all_grades) != 0:
-            return "{:3.1f}".format(sum(all_grades)/len(all_grades))
-        return 0
-
     def to_dict(self):
         return {
             "id": self.id,
@@ -120,7 +110,6 @@ class Course(db.Model):
             "submissions_count": self.submissions_count,
             "assignments_count": self.assignments_count,
             "enrolled_students_count": self.enrolled_students_count,
-            "avg_grade": self.avg_grade,
         }
 
 
@@ -151,7 +140,7 @@ class Course_work(db.Model):
             "course_id": self.course_id,
             "title": self.title,
             "due_date": self.due_date,
-            "count": self.count_all_submissions,
+            "submissions_count": self.count_all_submissions,
         }
 
 # def decimal_default(obj):
