@@ -31,7 +31,7 @@ class Submission(db.Model):
     course_work_id = db.Column(db.Integer, db.ForeignKey('course_works.id'),
                                nullable=False)
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=False)
-    # student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False)
+    student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False)
     type = db.Column(db.Enum("NEW", "TURNED_IN", name="status"))
     assigned_points = db.Column(db.Float, nullable=False)
     max_points = db.Column(db.Float, nullable=False)
@@ -70,8 +70,8 @@ class Student(db.Model):
     school_id = db.Column(db.Integer, nullable=False)
     grade_level = db.Column(db.String(255), nullable=False)
 
-    # student_submissions = db.relationship('Submission',
-    #                                       backref='student', lazy=True)
+    student_submissions = db.relationship('Submission',
+                                           backref='student', lazy=True)
     enrolled_courses = db.relationship('Course',
                                        back_populates='signedup_students',
                                        secondary='rosters')
@@ -82,7 +82,7 @@ class Student(db.Model):
         all_assignments = [work for work in course.course_works for
                            course in all_courses]
         return len([assignment for assignment in all_assignments
-                    if assignment.type = 'TURNED_IN'])
+                    if assignment.type == 'TURNED_IN'])
 
     def to_dict(self):
         return {
@@ -108,10 +108,12 @@ class Course(db.Model):
                                        secondary='rosters')
     @property
     def avg_grade(self):
-        ratings = Rating.query.filter_by(movie_id=self.movie_id).all()
-        all_ratings = [r.rating for r in ratings]
-        if len(all_ratings) != 0:
-            return "{:2.1f}".format(sum(all_ratings)/len(all_ratings))
+        all_students = self.signedup_students
+        all_submissions = [submission for submission in student.student_submissions
+                            for student in all_students]
+        all_grades = [s.assigned_points for s in all_submissions]
+        if len(all_grades) != 0:
+            return "{:3.1f}".format(sum(all_grades)/len(all_grades))
         return 0
 
     def to_dict(self):
@@ -131,6 +133,11 @@ class Course_work(db.Model):
     due_date = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
 
     work_submissions = db.relationship('Submission', backref='course_work', lazy=True)
+
+    def all_created_assigments(self, teacher_id):
+        courses = Course.query.filter(Course.teacher_id = teacher_id).all()
+        assignments = [work for work in course.course_works for course in courses]
+        return len(assignments)
 
     def to_dict(self):
         return {
