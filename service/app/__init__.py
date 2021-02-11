@@ -31,10 +31,6 @@ def hello():
     return "Hello World!"
 
 
-# This is a multi-purpose search engine that can return
-# movies based on match on title, genres, or movie_id(return one)
-
-
 @app.route('/students')
 def get_students():
     response = Student.query.all()
@@ -68,27 +64,36 @@ def get_submission_from_id(id):
 @app.route('/students/<int:student_id>')
 def get_completed_assignments_count(student_id):
     student = Student.query.get_or_404(student_id)
-    student_completed_assignments_count = student.completed_assignments
-    return {'count': student_completed_assignments_count}
+    student_submissions = student.student_submissions
+    student_completed_assignments = [submission
+                        for submission in student_submissions
+                        if submission.type == 'TURNED_IN']
+    student_completed_assignments_count = len(student_completed_assignments)
+    return {'count': student_completed_assignments_count,
+            'completed assignments':
+                [sub.to_dict() for sub in student_completed_assignments]}
 
 
 @app.route('/courses/<int:course_id>')
 def avg_grade(course_id):
     course = Course.query.get_or_404(course_id)
-    all_students = course.signedup_students
-    print(all_students)
-    all_submissions_matrix = [student.student_submissions
-                              for student in all_students]
-    all_submissions_flatten = [sub for sublist in all_submissions_matrix
-                               for sub in sublist]
-    valid_submissions = [sub for sub in all_submissions_flatten
-                         if sub.course_id == course_id]
-    print(all_submissions_flatten)
-    print(valid_submissions)
-    all_grades = [s.assigned_points for s in valid_submissions]
+    # all_students = course.signedup_students
+    # print(all_students)
+    # all_submissions_matrix = [student.student_submissions
+    #                           for student in all_students]
+    # all_submissions_flatten = [sub for sublist in all_submissions_matrix
+    #                            for sub in sublist]
+    # valid_submissions = [sub for sub in all_submissions_flatten
+    #                      if sub.course_id == course_id]
+    # print(all_submissions_flatten)
+    # print(valid_submissions)
+    course_submissions = course.course_submissions
+    print(course_submissions)
+    all_grades = [s.assigned_points for s in course_submissions]
     print(all_grades)
     if len(all_grades) != 0:
-        return "{:3.1f}".format(sum(all_grades)/len(all_grades))
+        avg_grade = "{:3.1f}".format(sum(all_grades)/len(all_grades))
+        return {"all_grades": all_grades, "avg_grade": avg_grade}
     return 0
 
 

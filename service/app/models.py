@@ -15,15 +15,6 @@ rosters = db.Table(
 )
 
 
-# This is flask json encoding for jsonify Numeric object like rating
-# class MyJSONEncoder(flask.json.JSONEncoder):
-#     def default(self, obj):
-#         if isinstance(obj, decimal.Decimal):
-#             # Convert decimal instances to strings.
-#             return str(obj)
-#         return super(MyJSONEncoder, self).default(obj)
-
-
 class Submission(db.Model):
     __tablename__ = 'submissions'
 
@@ -70,16 +61,17 @@ class Student(db.Model):
 
     @property
     def completed_assignments(self):
-        all_courses = self.enrolled_courses
-        all_assignments_matrix = [course.course_works for course in all_courses]
-        all_assignments_flatten = [assign for sublist in all_assignments_matrix
-                                  for assign in sublist]
-        all_submissions_matrix = [assign.work_submissions for assign
-                                  in all_assignments_flatten]
-        all_submissions_flatten = [sub for sublist in all_submissions_matrix
-                                  for sub in sublist]
-        valid_submissions = [sub for sub in all_submissions_flatten
-                            if sub.student_id == self.id]
+        # all_courses = self.enrolled_courses
+        # all_assignments_matrix = [course.course_works for course in all_courses]
+        # all_assignments_flatten = [assign for sublist in all_assignments_matrix
+        #                           for assign in sublist]
+        # all_submissions_matrix = [assign.work_submissions for assign
+        #                           in all_assignments_flatten]
+        # all_submissions_flatten = [sub for sublist in all_submissions_matrix
+        #                           for sub in sublist]
+        # valid_submissions = [sub for sub in all_submissions_flatten
+        #                     if sub.student_id == self.id]
+        valid_submissions = self.student_submissions
         student_completed_assignments = [submission
                         for submission in valid_submissions
                         if submission.type == 'TURNED_IN']
@@ -92,6 +84,7 @@ class Student(db.Model):
             "grade_level": self.grade_level,
             "total_enrolled_courses": self.total_enrolled_courses,
             "total_submissions": self.total_submissions,
+            "completed_assignments": self.completed_assignments,
         }
 
 
@@ -154,8 +147,3 @@ class Course_work(db.Model):
             "due_date": self.due_date,
             "submissions_count": self.count_all_submissions,
         }
-
-# def decimal_default(obj):
-#     if isinstance(obj, decimal.Decimal):
-#         return float(obj)
-#     raise TypeError
