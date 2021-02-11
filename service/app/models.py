@@ -68,6 +68,23 @@ class Student(db.Model):
     def total_enrolled_courses(self):
         return len(self.enrolled_courses)
 
+    @property
+    def completed_assignments(self):
+        all_courses = self.enrolled_courses
+        all_assignments_matrix = [course.course_works for course in all_courses]
+        all_assignments_flatten = [assign for sublist in all_assignments_matrix
+                                  for assign in sublist]
+        all_submissions_matrix = [assign.work_submissions for assign
+                                  in all_assignments_flatten]
+        all_submissions_flatten = [sub for sublist in all_submissions_matrix
+                                  for sub in sublist]
+        valid_submissions = [sub for sub in all_submissions_flatten
+                            if sub.student_id == self.id]
+        student_completed_assignments = [submission
+                        for submission in valid_submissions
+                        if submission.type == 'TURNED_IN']
+        return len(student_completed_assignments)
+
     def to_dict(self):
         return {
             "id": self.id,

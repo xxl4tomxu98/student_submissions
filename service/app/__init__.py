@@ -68,27 +68,8 @@ def get_submission_from_id(id):
 @app.route('/students/<int:student_id>')
 def get_completed_assignments_count(student_id):
     student = Student.query.get_or_404(student_id)
-    all_courses = student.enrolled_courses
-    print(all_courses)
-    all_assignments_matrix = [course.course_works for course in all_courses]
-    print(all_assignments_matrix)
-    all_assignments_flatten = [assign for sublist in all_assignments_matrix
-                               for assign in sublist]
-    print(all_assignments_flatten)
-    all_submissions_matrix = [assign.work_submissions for assign
-                              in all_assignments_flatten]
-    all_submissions_flatten = [sub for sublist in all_submissions_matrix
-                               for sub in sublist]
-    print(all_submissions_flatten)
-    valid_submissions = [sub for sub in all_submissions_flatten
-                         if sub.student_id == student_id]
-    student_completed_assignments = [submission
-                    for submission in valid_submissions
-                    if submission.type == 'TURNED_IN']
-    student_completed_assignments_count = len(student_completed_assignments)
-    return {'count': student_completed_assignments_count,
-            'completed_assignments': [assign.to_dict() for assign in
-                                       student_completed_assignments]}
+    student_completed_assignments_count = student.completed_assignments
+    return {'count': student_completed_assignments_count}
 
 
 @app.route('/courses/<int:course_id>')
@@ -124,3 +105,19 @@ def all_created_assigments_count(teacher_id):
     return {'teacher_created_assignments_count': all_created_assignments_count,
             'created_assignments': [assign.to_dict() for assign in
                                        all_assignments_flatten]}
+
+
+@app.route('/schools/<int:school_id>')
+def students_complete_percentile(school_id):
+    all_students = Student.query.filter(Student.school_id == school_id).all()
+    print(all_students)
+    completed_assignments_counts = [student.completed_assignments for student
+                                     in all_students]
+    print(completed_assignments_counts)
+    counts_greater_than_one = [count for count in completed_assignments_counts
+                                if count > 1]
+    print(counts_greater_than_one)
+    if len(completed_assignments_counts) == 0:
+        return "no student has completed assignments"
+    percentile = len(counts_greater_than_one)/len(completed_assignments_counts)*100
+    return {"Percentile Completed More Than One": percentile}
