@@ -129,11 +129,6 @@ class Course_work(db.Model):
         return len(all_submissions)
 
 
-    def all_created_assigments(self, teacher_id):
-        courses = Course.query.filter(Course.teacher_id == teacher_id).all()
-        assignments = [work for work in course.course_works for course in courses]
-        return len(assignments)
-
     def to_dict(self):
         return {
             "id": self.id,

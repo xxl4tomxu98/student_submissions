@@ -80,8 +80,10 @@ def get_completed_assignments_count(student_id):
     all_submissions_flatten = [sub for sublist in all_submissions_matrix
                                for sub in sublist]
     print(all_submissions_flatten)
+    valid_submissions = [sub for sub in all_submissions_flatten
+                         if sub.student_id == student_id]
     student_completed_assignments = [submission
-                    for submission in all_submissions_flatten
+                    for submission in valid_submissions
                     if submission.type == 'TURNED_IN']
     student_completed_assignments_count = len(student_completed_assignments)
     return {'count': student_completed_assignments_count,
@@ -91,14 +93,34 @@ def get_completed_assignments_count(student_id):
 
 @app.route('/courses/<int:course_id>')
 def avg_grade(course_id):
-    course = Course.query.filter_by(id = course_id).first()
+    course = Course.query.get_or_404(course_id)
     all_students = course.signedup_students
-    all_submissions_matrix = [[submission for submission in
-                               student.student_submissions]
+    print(all_students)
+    all_submissions_matrix = [student.student_submissions
                               for student in all_students]
     all_submissions_flatten = [sub for sublist in all_submissions_matrix
                                for sub in sublist]
-    all_grades = [s.assigned_points for s in all_submissions_flatten]
+    valid_submissions = [sub for sub in all_submissions_flatten
+                         if sub.course_id == course_id]
+    print(all_submissions_flatten)
+    print(valid_submissions)
+    all_grades = [s.assigned_points for s in valid_submissions]
+    print(all_grades)
     if len(all_grades) != 0:
         return "{:3.1f}".format(sum(all_grades)/len(all_grades))
     return 0
+
+
+@app.route('/teachers/<int:teacher_id>')
+def all_created_assigments_count(teacher_id):
+    all_courses = Course.query.filter(Course.teacher_id == teacher_id).all()
+    print(all_courses)
+    all_assignments_matrix = [course.course_works for course in all_courses]
+    print(all_assignments_matrix)
+    all_assignments_flatten = [assign for sublist in all_assignments_matrix
+                               for assign in sublist]
+    print(all_assignments_flatten)
+    all_created_assignments_count = len(all_assignments_flatten)
+    return {'teacher_created_assignments_count': all_created_assignments_count,
+            'created_assignments': [assign.to_dict() for assign in
+                                       all_assignments_flatten]}
