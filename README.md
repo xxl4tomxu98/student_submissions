@@ -42,15 +42,26 @@
 
   -- Database postgresql named "records" were created with owner "records_app" and password "password".
 
-     ```create user records_app createdb password 'password'; ```
+     ``` .sql
 
-     ```create database records with owner records_app; ```
+        create user records_app createdb password 'password';
+
+     ```
+
+     ``` .sql
+
+        create database records with owner records_app;
+
+     ```
 
   -- Within the service folder run
-     ```
+
+     ``` shell
+
         pipenv shell
 
         python database.py
+
      ```
 
   -- Type of columns were specifically given, and PRIMARY KEYS and FOREIGN KEYS are defined.
