@@ -50,7 +50,7 @@
         create database records with owner records_app;
     ```
 
-    Within the service folder run
+- Within the service folder run
 
     ```bash
         pipenv shell
