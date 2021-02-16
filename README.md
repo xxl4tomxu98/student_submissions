@@ -1,3 +1,43 @@
+# Student Submission Dataset Building Connecting Server and Query Using Flask SqlAlchemy
+    -- by Tom Xu
+
+## Schema of the Dataset
+    -- Develop an API that can dynamically generate database queries:
+    -- Group by student_id and count completed assignments
+    -- Group by course_id and average grade
+    -- Group by teacher_id and count assignments created
+    -- Group by school_id and find percentage of students with more than 1 assignment completed
+
+    ### Use the web framework of your choice. Also use the datastore of your choice, but we suggest simply using SQLite to get started. Imagine the following 3 datasets when executing queries:
+
+    student_submission - this table describes all the assignments administered to students and their status
+    submission_id (primary key)
+    course_work_id
+    course_id
+    student_id
+    status (enum NEW, TURNED_IN)
+    assigned_points (float)
+    max_points (float)
+
+    roster - this table describes all the students rostered in a course
+    student_id
+    course_id
+
+    student - this table describes additional information about a student
+    student_id
+    school
+    grade_level
+
+    course - this table describes additional information about a course
+    teacher_id
+    course_id
+    name
+
+    course_work - this table describes additional information about course work (assignments)
+    course_id
+    title
+    due date
+
 ## Backend Setup and Process
 
   -- Database postgresql named "records" were created with owner "records_app" and password "password".
@@ -22,17 +62,17 @@
 
 - .env and .flaskenv were created for environmental variables and entrypoint folder/files specification
 
-- Model schema were created with SqlAlchemy model against DB in file models.py
+- Implementation of the above Model schema were created with SqlAlchemy model against DB in file models.py
 
-  --class functions were built around all tables to help facilitate querying in sqlAlchemy.
+  -- Class functions were built around all tables to help facilitate querying in sqlAlchemy.
 
-  --relationships based on foreign key were created to do this last step.
+  -- Relationships based on foreign key were created to do this last step.
 
-  --there is an extra many to many table "roster" relationship built to represent relationship between students and courses tables.
+  -- There is an extra many to many table "roster" relationship built to represent relationship between students and courses tables.
 
-  --to_dict functions were built to facilitate sending JSON to frontend.
+  -- to_dict functions were built to facilitate sending JSON to frontend.
 
-  --I could draw a model schema on a chart to show relationships but believe this is not necessary since the schema is straightforward based table relations.
+  -- I could draw a model schema on a chart to show relationships but believe this is not necessary since the schema is straightforward based table relations.
 
 - In the file init.py within app folder the library dependencies were imported, connection to DB were setup and     initial flask app initiated.
 
